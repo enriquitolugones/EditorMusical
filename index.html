@@ -342,8 +342,7 @@ function actualizarAcordeDesdeTabla() {
 
   if (acorde) {
     cuadroActivo.contenido = acorde;
-    pintarTablero();
-    abrirModalAcordes(cuadroActivo);
+    document.getElementById("acordeLibre").value = acorde;
   }
 }
 
