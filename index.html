@@ -158,17 +158,17 @@
   <div class="cabecera">
     <div class="campo">
       <label>Tema musical</label>
-      <input id="tema" type="text">
+      <input id="tema" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
     </div>
 
     <div class="campo">
       <label>Autor</label>
-      <input id="autor" type="text">
+      <input id="autor" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
     </div>
 
     <div class="campo">
       <label>Tonalidad</label>
-      <input id="tonalidad" type="text">
+      <input id="tonalidad" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
     </div>
   </div>
 
@@ -223,6 +223,10 @@
 
           const acorde = document.createElement("textarea");
           acorde.className = "acorde";
+          acorde.autocomplete = "off";
+          acorde.autocorrect = "off";
+          acorde.autocapitalize = "off";
+          acorde.spellcheck = false;
           acorde.value = cuadro.contenido;
           acorde.placeholder = "Acorde";
           acorde.oninput = () => cuadro.contenido = acorde.value;
@@ -242,6 +246,10 @@
 
         const letra = document.createElement("textarea");
         letra.className = "letra";
+        letra.autocomplete = "off";
+        letra.autocorrect = "off";
+        letra.autocapitalize = "off";
+        letra.spellcheck = false;
         letra.value = fila.letra;
         letra.placeholder = "Letra de esta línea...";
         letra.style.setProperty(
