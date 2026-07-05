@@ -76,10 +76,16 @@
       flex-direction: column;
     }
 
-    .posicion {
+    .compas {
+      width: 48px;
       font-size: 13px;
-      color: #7f8b99;
+      color: #eaeef5;
+      background: #05070a;
+      border: 1px solid #394452;
+      border-radius: 6px;
+      padding: 4px;
       margin-bottom: 8px;
+      text-align: center;
     }
 
     .acorde {
@@ -195,7 +201,9 @@
       tonalidad: "",
       filas: [
         {
-          acordes: [{ contenido: "" }],
+          acordes: [
+            { compas: 1, contenido: "" }
+          ],
           letra: ""
         }
       ]
@@ -203,7 +211,22 @@
 
     const tablero = document.getElementById("tablero");
 
+    function renumerarCompases() {
+      let numero = 1;
+
+      cancion.filas.forEach(fila => {
+        fila.acordes.forEach(cuadro => {
+          if (!cuadro.compas || cuadro.compas < 1) {
+            cuadro.compas = numero;
+          }
+
+          numero = Number(cuadro.compas) + 1;
+        });
+      });
+    }
+
     function pintarTablero() {
+      renumerarCompases();
       tablero.innerHTML = "";
 
       cancion.filas.forEach((fila, i) => {
@@ -217,9 +240,21 @@
           const cuadroDiv = document.createElement("div");
           cuadroDiv.className = "cuadro";
 
-          const posicion = document.createElement("div");
-          posicion.className = "posicion";
-          posicion.textContent = `${i + 1},${j + 1}`;
+          const compas = document.createElement("input");
+          compas.className = "compas";
+          compas.type = "number";
+          compas.min = "1";
+          compas.value = cuadro.compas;
+          compas.autocomplete = "off";
+          compas.autocorrect = "off";
+          compas.autocapitalize = "off";
+          compas.spellcheck = false;
+
+          compas.onchange = () => {
+            cuadro.compas = Number(compas.value);
+            renumerarCompases();
+            pintarTablero();
+          };
 
           const acorde = document.createElement("textarea");
           acorde.className = "acorde";
@@ -231,7 +266,7 @@
           acorde.placeholder = "Acorde";
           acorde.oninput = () => cuadro.contenido = acorde.value;
 
-          cuadroDiv.appendChild(posicion);
+          cuadroDiv.appendChild(compas);
           cuadroDiv.appendChild(acorde);
           lineaAcordes.appendChild(cuadroDiv);
         });
@@ -264,15 +299,18 @@
     }
 
     function crearCuadroDerecha(i) {
-      cancion.filas[i].acordes.push({ contenido: "" });
+      cancion.filas[i].acordes.push({ compas: 1, contenido: "" });
+      renumerarCompases();
       pintarTablero();
     }
 
     function crearFila() {
       cancion.filas.push({
-        acordes: [{ contenido: "" }],
+        acordes: [{ compas: 1, contenido: "" }],
         letra: ""
       });
+
+      renumerarCompases();
       pintarTablero();
     }
 
@@ -320,12 +358,19 @@
         cancion.tonalidad = datos.tonalidad || "";
         cancion.filas = datos.filas || [
           {
-            acordes: [{ contenido: "" }],
+            acordes: [{ compas: 1, contenido: "" }],
             letra: ""
           }
         ];
 
+        cancion.filas.forEach(fila => {
+          fila.acordes.forEach(cuadro => {
+            if (!cuadro.compas) cuadro.compas = 1;
+          });
+        });
+
         cargarCabeceraDesdeObjeto();
+        renumerarCompases();
         pintarTablero();
       };
 
