@@ -175,6 +175,41 @@
     display: flex;
     gap: 10px;
   }
+    .modal-acordes {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.75);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.panel-acordes {
+  width: 90%;
+  max-width: 820px;
+  background: #10151c;
+  border: 1px solid #394452;
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.tabla-acordes {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+  margin: 10px 0;
+}
+
+.tabla-acordes button {
+  padding: 8px 4px;
+  font-size: 14px;
+}
+
+.acorde-libre {
+  width: 100%;
+  margin-bottom: 10px;
+}
 </style>
 </head>
 
@@ -209,7 +244,18 @@
       <input id="cargarArchivo" type="file" accept=".json" style="display:none" onchange="cargarJSON(event)">
     </div>
   </div>
+<div id="modalAcordes" class="modal-acordes">
+  <div class="panel-acordes">
+    <input id="acordeLibre" class="acorde-libre" type="text" placeholder="Escribir acorde libre">
 
+    <div id="tablaRaices" class="tabla-acordes"></div>
+    <div id="tablaTipos" class="tabla-acordes"></div>
+    <div id="tablaInversiones" class="tabla-acordes"></div>
+
+    <button onclick="aplicarAcordeLibre()">Aplicar</button>
+    <button onclick="cerrarModalAcordes()">Cerrar</button>
+  </div>
+</div>
   <script>
     const anchoCuadro = 160;
     const separacion = 10;
@@ -240,7 +286,68 @@
         });
       });
     }
+let cuadroActivo = null;
 
+const raices = ["C", "G", "D", "A", "E", "F#", "F", "Bb", "Eb", "Ab", "Db", "Gb"];
+const tipos = ["", "sus2", "sus4", "m", "5#", "5b", "7", "m7", "6/9", "add6", "add9", "9", "11", "11#", "13"];
+const inversiones = ["", "1 inv", "2 inv", "3 inv"];
+
+let raizElegida = "";
+let tipoElegido = "";
+let inversionElegida = "";
+
+function abrirModalAcordes(cuadro) {
+  cuadroActivo = cuadro;
+  raizElegida = "";
+  tipoElegido = "";
+  inversionElegida = "";
+
+  document.getElementById("acordeLibre").value = cuadro.contenido || "";
+  pintarTabla("tablaRaices", raices, valor => raizElegida = valor);
+  pintarTabla("tablaTipos", tipos, valor => tipoElegido = valor);
+  pintarTabla("tablaInversiones", inversiones, valor => inversionElegida = valor);
+
+  document.getElementById("modalAcordes").style.display = "flex";
+}
+
+function pintarTabla(id, lista, accion) {
+  const contenedor = document.getElementById(id);
+  contenedor.innerHTML = "";
+
+  lista.forEach(valor => {
+    const boton = document.createElement("button");
+    boton.textContent = valor || "normal";
+    boton.onclick = () => {
+      accion(valor);
+      actualizarAcordeDesdeTabla();
+    };
+    contenedor.appendChild(boton);
+  });
+}
+
+function actualizarAcordeDesdeTabla() {
+  if (!cuadroActivo) return;
+
+  const acorde = (raizElegida + tipoElegido + (inversionElegida ? " " + inversionElegida : "")).trim();
+
+  if (acorde) {
+    cuadroActivo.contenido = acorde;
+    pintarTablero();
+    abrirModalAcordes(cuadroActivo);
+  }
+}
+
+function aplicarAcordeLibre() {
+  if (!cuadroActivo) return;
+
+  cuadroActivo.contenido = document.getElementById("acordeLibre").value;
+  cerrarModalAcordes();
+  pintarTablero();
+}
+
+function cerrarModalAcordes() {
+  document.getElementById("modalAcordes").style.display = "none";
+}
     function pintarTablero() {
       renumerarCompases();
       tablero.innerHTML = "";
@@ -338,16 +445,24 @@
     }
 
     function crearBotonTipo(texto, tipo, cuadro) {
-      const boton = document.createElement("button");
-      boton.className = "tipo";
-      boton.textContent = texto;
-      if (cuadro.tipo === tipo) boton.classList.add("activo");
-      boton.onclick = () => {
-        cuadro.tipo = tipo;
-        pintarTablero();
-      };
-      return boton;
+  const boton = document.createElement("button");
+  boton.className = "tipo";
+  boton.textContent = texto;
+
+  if (cuadro.tipo === tipo) boton.classList.add("activo");
+
+  boton.onclick = () => {
+    cuadro.tipo = tipo;
+
+    if (tipo === "nombre") {
+      abrirModalAcordes(cuadro);
+    } else {
+      pintarTablero();
     }
+  };
+
+  return boton;
+}
 
     function eliminarAcorde(fila, columna) {
       if (cancion.filas[fila].acordes.length === 1) return;
