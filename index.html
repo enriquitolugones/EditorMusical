@@ -499,7 +499,7 @@ if (cuadro.tipo === "partitura") {
 } else if (cuadro.tipo === "instrumento") {
 
   const contenedor = document.createElement("div");
-  contenedor.innerHTML = cuadro.contenido || "";
+  contenedor.innerHTML = cuadro.htmlTarjeta || "";
   cuadroDiv.appendChild(contenedor);
 
 } else {
