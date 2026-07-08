@@ -722,21 +722,17 @@ function seleccionarInstrumento(instrumento) {
 }
 
 window.addEventListener("storage", function(event) {
-  if (event.key === "acordeSeleccionado") {
-    cargarAcordeDesdeBiblioteca();
+  if (event.key === "tarjetaSeleccionada") {
+    cargarTarjetaDesdeBiblioteca();
   }
 });
 
-function cargarAcordeDesdeBiblioteca() {
-  const datos = localStorage.getItem("acordeSeleccionado");
-  if (!datos || !cuadroActivo) return;
-
-  const acorde = JSON.parse(datos);
+function cargarTarjetaDesdeBiblioteca() {
+  const html = localStorage.getItem("tarjetaSeleccionada");
+  if (!html || !cuadroActivo) return;
 
   cuadroActivo.tipo = "instrumento";
-  cuadroActivo.instrumento = acorde.instrumento;
-  cuadroActivo.contenido = acorde.nombre;
-  cuadroActivo.acordeBiblioteca = acorde;
+  cuadroActivo.contenido = html;
 
   pintarTablero();
 }
