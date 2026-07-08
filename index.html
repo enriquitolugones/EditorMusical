@@ -252,6 +252,7 @@
       <button onclick="guardarJSON()">Guardar JSON</button>
       <button onclick="document.getElementById('cargarArchivo').click()">Cargar JSON</button>
       <button onclick="imprimir()">Imprimir</button>
+      <button onclick="abrirAyudaABC()">Ayuda ABC</button>
       <input id="cargarArchivo" type="file" accept=".json" style="display:none" onchange="cargarJSON(event)">
     </div>
   </div>
@@ -608,7 +609,67 @@ if (cuadro.tipo === "partitura") {
     }
 
     pintarTablero();
-  </script>
 
+    function abrirAyudaABC() {
+  document.getElementById("modalAyudaABC").style.display = "flex";
+}
+
+function cerrarAyudaABC() {
+  document.getElementById("modalAyudaABC").style.display = "none";
+}
+  </script>
+<div id="modalAyudaABC" class="modal-acordes">
+  <div class="panel-acordes">
+    <h2>Ayuda rápida ABC</h2>
+
+    <pre style="white-space: pre-wrap; line-height: 1.5;">
+4 corcheas:
+G _G F E |
+
+Bemol:
+_G
+
+Sostenido:
+^F
+
+Becuadro:
+=F
+
+Silencios:
+z
+z2
+z4
+
+Octavas:
+C D E F G A B
+c d e f g a b
+C,  una octava abajo
+c'  una octava arriba
+
+Duraciones:
+C    corchea si L:1/8
+C2   negra
+C4   blanca
+C/   semicorchea
+
+Compases:
+|
+||
+|:
+:|
+
+Tresillo:
+(3GFE
+
+Acorde:
+[G B d]
+
+Ejemplo:
+G _G F E | D C B, A, |
+    </pre>
+
+    <button onclick="cerrarAyudaABC()">Cerrar</button>
+  </div>
+</div>
 </body>
 </html>
