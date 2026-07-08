@@ -633,14 +633,17 @@ function cerrarModalInstrumento() {
 function seleccionarInstrumento(instrumento) {
   if (!cuadroActivo) return;
 
-  cuadroActivo.tipo = "instrumento";
-  cuadroActivo.instrumento = instrumento;
-  cuadroActivo.contenido = instrumento === "cavaco"
-    ? "🇧🇷 Cavaquinho"
-    : "🇪🇸 Guitarra";
-
   cerrarModalInstrumento();
-  pintarTablero();
+
+  if (instrumento === "cavaco") {
+    window.open("Biblioteca/cavaquinho.html", "_blank");
+    return;
+  }
+
+  if (instrumento === "guitarra") {
+    alert("Biblioteca de guitarra pendiente.");
+    return;
+  }
 }
     
   </script>
