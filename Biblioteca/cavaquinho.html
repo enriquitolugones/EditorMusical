@@ -223,19 +223,11 @@ function dibujarDiagramas() {
 }
 
 function elegirAcorde(nombre, trasteBase, puntos) {
-  const acorde = {
-    instrumento: "cavaco",
-    nombre: nombre,
-    trasteBase: trasteBase,
-    puntos: puntos.map(p => ({
-      cuerda: p[0],
-      traste: p[1]
-    }))
-  };
+  const tarjeta = event.currentTarget.cloneNode(true);
 
-  localStorage.setItem("acordeSeleccionado", JSON.stringify(acorde));
+  tarjeta.removeAttribute("onclick");
 
-  alert("Acorde cargado: " + nombre);
+  localStorage.setItem("tarjetaSeleccionada", tarjeta.outerHTML);
 
   window.close();
 }
