@@ -772,6 +772,40 @@ function cargarTarjetaDesdeBiblioteca() {
   cuadroActivo.contenido = "";
 
   pintarTablero();
+  dibujarDiagramasPegados();
+}
+
+function dibujarDiagramasPegados() {
+  document.querySelectorAll("#tablero .diagrama").forEach(diagrama => {
+    diagrama.innerHTML = "";
+
+    for (let i = 0; i < 4; i++) {
+      const cuerda = document.createElement("div");
+      cuerda.className = "cuerda";
+      diagrama.appendChild(cuerda);
+    }
+
+    for (let i = 0; i < 6; i++) {
+      const traste = document.createElement("div");
+      traste.className = "traste t" + i;
+      diagrama.appendChild(traste);
+    }
+
+    const datos = diagrama.dataset.puntos || "";
+
+    datos.split(",").forEach(item => {
+      if (!item) return;
+
+      const [cuerda, traste] = item.split("-").map(Number);
+
+      const punto = document.createElement("div");
+      punto.className = "punto";
+      punto.style.top = (15 + ((cuerda - 1) * 20)) + "px";
+      punto.style.left = ((traste - 0.5) * 24) + "px";
+
+      diagrama.appendChild(punto);
+    });
+  });
 }
     
   </script>
