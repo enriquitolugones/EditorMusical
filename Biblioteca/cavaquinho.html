@@ -1,1 +1,247 @@
 
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Biblioteca Cavaquinho</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: #05070a;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+header {
+  padding: 16px;
+  background: #10151c;
+  border-bottom: 1px solid #2b3440;
+}
+
+h1 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.zona {
+  padding: 16px;
+}
+
+.grupo {
+  margin-bottom: 28px;
+}
+
+.grupo h2 {
+  color: #9fa8b5;
+  border-bottom: 1px solid #2b3440;
+  padding-bottom: 6px;
+}
+
+.lista-acordes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.acorde-card {
+  width: 150px;
+  background: #111821;
+  border: 1px solid #394452;
+  border-radius: 10px;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.acorde-card:hover {
+  border-color: #2f81f7;
+  background: #162235;
+}
+
+.nombre-acorde {
+  text-align: center;
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+
+.diagrama {
+  position: relative;
+  width: 120px;
+  height: 90px;
+  margin: auto;
+}
+
+.cuerda {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: white;
+}
+
+.cuerda:nth-child(1) { top: 15px; }
+.cuerda:nth-child(2) { top: 35px; }
+.cuerda:nth-child(3) { top: 55px; }
+.cuerda:nth-child(4) { top: 75px; }
+
+.traste {
+  position: absolute;
+  top: 15px;
+  bottom: 15px;
+  width: 2px;
+  background: white;
+}
+
+.traste.t0 { left: 0; }
+.traste.t1 { left: 24px; }
+.traste.t2 { left: 48px; }
+.traste.t3 { left: 72px; }
+.traste.t4 { left: 96px; }
+.traste.t5 { left: 120px; }
+
+.punto {
+  position: absolute;
+  width: 13px;
+  height: 13px;
+  background: black;
+  border: 2px solid white;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.traste-numero {
+  text-align: center;
+  font-size: 13px;
+  color: #9fa8b5;
+  margin-top: 4px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>🇧🇷 Biblioteca de Cavaquinho</h1>
+</header>
+
+<div class="zona">
+
+  <div class="grupo">
+    <h2>C</h2>
+    <div class="lista-acordes">
+
+      <div class="acorde-card" onclick="elegirAcorde('C', 1, [[1,2],[2,1],[3,2]])">
+        <div class="nombre-acorde">C</div>
+        <div class="diagrama" data-puntos="1-2,2-1,3-2"></div>
+        <div class="traste-numero">1</div>
+      </div>
+
+      <div class="acorde-card" onclick="elegirAcorde('C7', 1, [[1,2],[2,1],[3,2],[4,1]])">
+        <div class="nombre-acorde">C7</div>
+        <div class="diagrama" data-puntos="1-2,2-1,3-2,4-1"></div>
+        <div class="traste-numero">1</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="grupo">
+    <h2>D</h2>
+    <div class="lista-acordes">
+
+      <div class="acorde-card" onclick="elegirAcorde('Dm7', 1, [[1,1],[2,1],[3,1],[4,1]])">
+        <div class="nombre-acorde">Dm7</div>
+        <div class="diagrama" data-puntos="1-1,2-1,3-1,4-1"></div>
+        <div class="traste-numero">1</div>
+      </div>
+
+      <div class="acorde-card" onclick="elegirAcorde('D7', 1, [[1,2],[2,1],[3,2],[4,2]])">
+        <div class="nombre-acorde">D7</div>
+        <div class="diagrama" data-puntos="1-2,2-1,3-2,4-2"></div>
+        <div class="traste-numero">1</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="grupo">
+    <h2>G</h2>
+    <div class="lista-acordes">
+
+      <div class="acorde-card" onclick="elegirAcorde('G', 1, [[1,2],[2,3],[3,2]])">
+        <div class="nombre-acorde">G</div>
+        <div class="diagrama" data-puntos="1-2,2-3,3-2"></div>
+        <div class="traste-numero">1</div>
+      </div>
+
+      <div class="acorde-card" onclick="elegirAcorde('G7', 1, [[1,2],[2,1],[3,2]])">
+        <div class="nombre-acorde">G7</div>
+        <div class="diagrama" data-puntos="1-2,2-1,3-2"></div>
+        <div class="traste-numero">1</div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+function dibujarDiagramas() {
+  document.querySelectorAll(".diagrama").forEach(diagrama => {
+    diagrama.innerHTML = "";
+
+    for (let i = 0; i < 4; i++) {
+      const cuerda = document.createElement("div");
+      cuerda.className = "cuerda";
+      diagrama.appendChild(cuerda);
+    }
+
+    for (let i = 0; i < 6; i++) {
+      const traste = document.createElement("div");
+      traste.className = "traste t" + i;
+      diagrama.appendChild(traste);
+    }
+
+    const datos = diagrama.dataset.puntos || "";
+    datos.split(",").forEach(item => {
+      if (!item) return;
+
+      const [cuerda, traste] = item.split("-").map(Number);
+
+      const punto = document.createElement("div");
+      punto.className = "punto";
+
+      punto.style.top = (15 + ((cuerda - 1) * 20)) + "px";
+      punto.style.left = ((traste - 0.5) * 24) + "px";
+
+      diagrama.appendChild(punto);
+    });
+  });
+}
+
+function elegirAcorde(nombre, trasteBase, puntos) {
+  const acorde = {
+    instrumento: "cavaco",
+    nombre: nombre,
+    trasteBase: trasteBase,
+    puntos: puntos.map(p => ({
+      cuerda: p[0],
+      traste: p[1]
+    }))
+  };
+
+  localStorage.setItem("acordeSeleccionado", JSON.stringify(acorde));
+
+  alert("Acorde cargado: " + nombre);
+
+  window.close();
+}
+
+dibujarDiagramas();
+</script>
+
+</body>
+</html>
