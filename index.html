@@ -322,6 +322,21 @@
   color: #9fa8b5;
   margin-top: 4px;
 }
+    .marca-ritmica {
+  min-height: 22px;
+  margin-bottom: 4px;
+  padding: 3px 4px;
+  border-bottom: 1px solid #394452;
+  font-size: 16px;
+  text-align: center;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.tarjeta-con-marca {
+  transform: scale(0.82);
+  transform-origin: top center;
+}
 </style>
 </head>
 
@@ -520,10 +535,12 @@ function cerrarModalAcordes() {
         const bCavaco = crearBotonTipo("☰", "instrumento", cuadro);
           bCavaco.innerHTML = '<span class="cavaco-icono">☰</span>';
           const bPartitura = crearBotonTipo("𝄞", "partitura", cuadro);
+          const bRitmo = crearBotonRitmo(cuadro);
 
           selector.appendChild(bNombre);
           selector.appendChild(bCavaco);
           selector.appendChild(bPartitura);
+          selector.appendChild(bRitmo);
 
           const papelera = document.createElement("button");
           papelera.className = "papelera";
@@ -628,6 +645,24 @@ if (tipo === "nombre") {
   pintarTablero();
 }
     
+  };
+
+  return boton;
+}
+    function crearBotonRitmo(cuadro) {
+
+  const boton = document.createElement("button");
+
+  boton.className = "tipo";
+
+  boton.textContent = "♪";
+
+  if (cuadro.marcaRitmica && cuadro.marcaRitmica.trim() !== "") {
+    boton.classList.add("activo");
+  }
+
+  boton.onclick = () => {
+    abrirEditorRitmo(cuadro);
   };
 
   return boton;
