@@ -210,6 +210,15 @@
   width: 100%;
   margin-bottom: 10px;
 }
+
+    .partitura-box {
+  background: white;
+  color: black;
+  border-radius: 6px;
+  min-height: 70px;
+  overflow: hidden;
+}
+    
 </style>
 </head>
 
@@ -420,18 +429,45 @@ function cerrarModalAcordes() {
           barra.appendChild(selector);
           barra.appendChild(papelera);
 
-          const acorde = document.createElement("textarea");
-          acorde.className = "acorde";
-          acorde.autocomplete = "off";
-          acorde.autocorrect = "off";
-          acorde.autocapitalize = "off";
-          acorde.spellcheck = false;
-          acorde.value = cuadro.contenido;
-          acorde.placeholder = "Acorde";
-          acorde.oninput = () => cuadro.contenido = acorde.value;
-
           cuadroDiv.appendChild(barra);
-          cuadroDiv.appendChild(acorde);
+
+if (cuadro.tipo === "partitura") {
+  const partitura = document.createElement("div");
+  partitura.className = "partitura-box";
+
+  const abc = cuadro.contenido || "K:C\nC D E F|";
+
+  cuadroDiv.appendChild(partitura);
+
+  setTimeout(() => {
+    ABCJS.renderAbc(partitura, abc, {
+      responsive: "resize",
+      staffwidth: 140,
+      scale: 0.7
+    });
+  }, 0);
+
+  partitura.onclick = () => {
+    const nuevo = prompt("Escribe ABC:", cuadro.contenido || "K:C\nC D E F|");
+    if (nuevo !== null) {
+      cuadro.contenido = nuevo;
+      pintarTablero();
+    }
+  };
+
+} else {
+  const acorde = document.createElement("textarea");
+  acorde.className = "acorde";
+  acorde.autocomplete = "off";
+  acorde.autocorrect = "off";
+  acorde.autocapitalize = "off";
+  acorde.spellcheck = false;
+  acorde.value = cuadro.contenido;
+  acorde.placeholder = "Acorde";
+  acorde.oninput = () => cuadro.contenido = acorde.value;
+
+  cuadroDiv.appendChild(acorde);
+}
           lineaAcordes.appendChild(cuadroDiv);
         });
 
