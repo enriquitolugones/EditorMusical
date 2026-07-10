@@ -350,6 +350,7 @@ const CLAVE_SELECCION = "tarjetaSeleccionada";
 let acordes = [];
 let indiceEditando = null;
 let indiceArrastrado = null;
+let seEstaArrastrando = false;
 
 const listaAcordes = document.getElementById("listaAcordes");
 
@@ -456,38 +457,57 @@ function crearTarjeta(datos, indice, incluirAcciones = true) {
     tarjeta.appendChild(acciones);
 
     tarjeta.onclick = () => {
-      devolverAcordeAlEditor(datos);
-    };
+  if (seEstaArrastrando) return;
 
-    tarjeta.addEventListener("dragstart", event => {
-      indiceArrastrado = indice;
-      tarjeta.classList.add("arrastrando");
+  devolverAcordeAlEditor(datos);
+};
 
-      event.dataTransfer.effectAllowed = "move";
-      event.dataTransfer.setData("text/plain", String(indice));
-    });
+tarjeta.addEventListener("dragstart", event => {
+  indiceArrastrado = indice;
+  seEstaArrastrando = true;
 
-    tarjeta.addEventListener("dragend", () => {
-      tarjeta.classList.remove("arrastrando");
-      indiceArrastrado = null;
-      listaAcordes.classList.remove("destino");
-    });
+  tarjeta.classList.add("arrastrando");
 
-    tarjeta.addEventListener("dragover", event => {
-      event.preventDefault();
-      event.dataTransfer.dropEffect = "move";
-    });
+  event.dataTransfer.effectAllowed = "move";
+  event.dataTransfer.setData("text/plain", String(indice));
+});
 
-    tarjeta.addEventListener("drop", event => {
-      event.preventDefault();
-      event.stopPropagation();
+tarjeta.addEventListener("dragover", event => {
+  event.preventDefault();
+  event.stopPropagation();
 
-      const origen = Number(
-        event.dataTransfer.getData("text/plain")
-      );
+  event.dataTransfer.dropEffect = "move";
 
-      moverAcorde(origen, indice);
-    });
+  tarjeta.style.borderColor = "#2f81f7";
+});
+
+tarjeta.addEventListener("dragleave", () => {
+  tarjeta.style.borderColor = "";
+});
+
+tarjeta.addEventListener("drop", event => {
+  event.preventDefault();
+  event.stopPropagation();
+
+  tarjeta.style.borderColor = "";
+
+  const origen = Number(
+    event.dataTransfer.getData("text/plain")
+  );
+
+  moverAcorde(origen, indice);
+});
+
+tarjeta.addEventListener("dragend", () => {
+  tarjeta.classList.remove("arrastrando");
+  tarjeta.style.borderColor = "";
+
+  indiceArrastrado = null;
+
+  setTimeout(() => {
+    seEstaArrastrando = false;
+  }, 150);
+});
   }
 
   return tarjeta;
@@ -625,17 +645,24 @@ function borrarAcorde(indice) {
 
 function moverAcorde(origen, destino) {
   if (
-    Number.isNaN(origen) ||
+    !Number.isInteger(origen) ||
+    !Number.isInteger(destino) ||
     origen < 0 ||
     destino < 0 ||
+    origen >= acordes.length ||
+    destino >= acordes.length ||
     origen === destino
   ) {
     return;
   }
 
-  const [movido] = acordes.splice(origen, 1);
+  const [acordeMovido] = acordes.splice(origen, 1);
 
-  acordes.splice(destino, 0, movido);
+  if (origen < destino) {
+    destino--;
+  }
+
+  acordes.splice(destino, 0, acordeMovido);
 
   guardarBiblioteca();
   pintarBiblioteca();
