@@ -873,16 +873,20 @@ function cerrarEditorRitmo() {
 }
 
 function insertarRitmo(simbolo) {
+  if (!cuadroRitmoActivo) return;
+
   const entrada = document.getElementById("textoRitmo");
 
-  const inicio = entrada.selectionStart;
-  const fin = entrada.selectionEnd;
+  const inicio = entrada.selectionStart ?? entrada.value.length;
+  const fin = entrada.selectionEnd ?? entrada.value.length;
   const textoActual = entrada.value;
 
   entrada.value =
     textoActual.slice(0, inicio) +
     simbolo +
     textoActual.slice(fin);
+
+  cuadroRitmoActivo.marcaRitmica = entrada.value;
 
   const nuevaPosicion = inicio + simbolo.length;
   entrada.focus();
@@ -895,9 +899,12 @@ function guardarRitmo() {
   cuadroRitmoActivo.marcaRitmica =
     document.getElementById("textoRitmo").value;
 
-  cerrarEditorRitmo();
+  document.getElementById("modalRitmo").style.display = "none";
+
   pintarTablero();
   dibujarDiagramasPegados();
+
+  cuadroRitmoActivo = null;
 }
 
 function limpiarRitmo() {
