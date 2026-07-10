@@ -661,18 +661,52 @@ function actualizarVistaPrevia() {
 }
 
 function devolverAcordeAlEditor(datos) {
-  const tarjeta = crearTarjeta(datos, -1, false);
+  const puntos = datos.cuerdas
+    .map((traste, indice) => {
+      if (Number(traste) === 0) return null;
 
-  tarjeta.removeAttribute("draggable");
+      const numeroCuerda = indice + 1;
+
+      return numeroCuerda + "-" + Number(traste);
+    })
+    .filter(Boolean)
+    .join(",");
+
+  const tarjeta = document.createElement("div");
+  tarjeta.className = "acorde-card";
+
+  const nombre = document.createElement("div");
+  nombre.className = "nombre-acorde";
+  nombre.textContent = datos.nombre;
+
+  const diagrama = document.createElement("div");
+  diagrama.className = "diagrama";
+  diagrama.dataset.puntos = puntos;
+
+  const numero = document.createElement("div");
+  numero.className = "traste-numero";
+  numero.textContent = datos.numeroAbajo || "";
+
+  tarjeta.appendChild(nombre);
+  tarjeta.appendChild(diagrama);
+  tarjeta.appendChild(numero);
 
   localStorage.setItem(
     CLAVE_SELECCION,
     tarjeta.outerHTML
   );
 
-  if (window.opener && !window.opener.closed) {
-    window.close();
+  if (
+    window.opener &&
+    !window.opener.closed &&
+    typeof window.opener.cargarTarjetaDesdeBiblioteca === "function"
+  ) {
+    window.opener.cargarTarjetaDesdeBiblioteca();
   }
+
+  setTimeout(() => {
+    window.close();
+  }, 150);
 }
 
 [
