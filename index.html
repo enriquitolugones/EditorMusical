@@ -579,13 +579,7 @@ if (cuadro.tipo === "partitura") {
 
 } else if (cuadro.tipo === "instrumento") {
 
-  if (cuadro.marcaRitmica && cuadro.marcaRitmica.trim() !== "") {
-    const marca = document.createElement("div");
-    marca.className = "marca-ritmica";
-    marca.textContent = cuadro.marcaRitmica;
-    marca.onclick = () => abrirEditorRitmo(cuadro);
-    cuadroDiv.appendChild(marca);
-  }
+ 
 
   const contenedor = document.createElement("div");
   contenedor.innerHTML = cuadro.htmlTarjeta || "";
