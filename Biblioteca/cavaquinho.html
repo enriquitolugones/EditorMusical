@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Biblioteca Cavaquinho</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: #05070a;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+header {
+  padding: 16px;
+  background: #10151c;
+  border-bottom: 1px solid #2b3440;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+h1 { margin: 0; font-size: 24px; }
+
+button {
+  background: #1c2633;
+  color: white;
+  border: 1px solid #3c4858;
+  border-radius: 8px;
+  padding: 9px 13px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+button:hover { background: #263445; }
+
+.zona { padding: 16px; }
+
+.biblioteca {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.bloque {
+  border: 1px solid #30363d;
+  border-radius: 12px;
+  background: #0c1118;
+  overflow: hidden;
+}
+
+.bloque.arrastrando {
+  opacity: .4;
+}
+
+.bloque.destino-carpeta {
+  border-color: #2f81f7;
+  box-shadow: 0 0 0 2px rgba(47,129,247,.18);
+}
+
+.cabecera-bloque {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #10151c;
+  border-bottom: 1px solid #30363d;
+  cursor: grab;
+}
+
+.cabecera-bloque:active { cursor: grabbing; }
+
+.titulo-carpeta {
+  font-size: 17px;
+  font-weight: bold;
+}
+
+.acciones-carpeta {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.acciones-carpeta button {
+  padding: 5px 8px;
+  font-size: 12px;
+}
+
+.lista-acordes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 14px;
+  min-height: 130px;
+  padding: 12px;
+}
+
+.lista-acordes.destino {
+  background: #0f1623;
+  outline: 2px dashed #2f81f7;
+  outline-offset: -6px;
+}
+
+.mensaje-vacio {
+  color: #8b949e;
+  padding: 20px;
+}
+
+.acorde-card {
+  width: 150px;
+  background: #111821;
+  border: 1px solid #394452;
+  border-radius: 10px;
+  padding: 8px;
+  cursor: pointer;
+  position: relative;
+  user-select: none;
+}
+
+.acorde-card:hover {
+  border-color: #2f81f7;
+  background: #162235;
+}
+
+.acorde-card.arrastrando { opacity: 0.35; }
+
+.nombre-acorde {
+  text-align: center;
+  font-size: 18px;
+  margin-bottom: 6px;
+  min-height: 22px;
+}
+
+.diagrama {
+  position: relative;
+  width: 120px;
+  height: 90px;
+  margin: auto;
+}
+
+.cuerda {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: white;
+}
+
+.cuerda.c1 { top: 15px; }
+.cuerda.c2 { top: 35px; }
+.cuerda.c3 { top: 55px; }
+.cuerda.c4 { top: 75px; }
+
+.traste {
+  position: absolute;
+  top: 15px;
+  bottom: 15px;
+  width: 2px;
+  background: white;
+}
+
+.traste.t0 { left: 0; }
+.traste.t1 { left: 24px; }
+.traste.t2 { left: 48px; }
+.traste.t3 { left: 72px; }
+.traste.t4 { left: 96px; }
+.traste.t5 { left: 120px; }
+
+.punto {
+  position: absolute;
+  width: 13px;
+  height: 13px;
+  background: black;
+  border: 2px solid white;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+
+.traste-numero {
+  text-align: center;
+  font-size: 13px;
+  color: #9fa8b5;
+  margin-top: 4px;
+  min-height: 16px;
+}
+
+.acciones-tarjeta {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 7px;
+}
+
+.acciones-tarjeta button {
+  padding: 4px 7px;
+  font-size: 11px;
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.78);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.panel {
+  width: 92%;
+  max-width: 650px;
+  max-height: 90vh;
+  overflow: auto;
+  background: #10151c;
+  border: 1px solid #394452;
+  border-radius: 12px;
+  padding: 18px;
+}
+
+.panel h2 { margin-top: 0; }
+
+.campos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.campo label {
+  color: #9fa8b5;
+  font-size: 13px;
+}
+
+.campo input,
+.campo select {
+  width: 100%;
+  padding: 9px;
+  background: #05070a;
+  color: white;
+  border: 1px solid #394452;
+  border-radius: 6px;
+  font-size: 16px;
+}
+
+.vista-previa {
+  margin: 18px auto;
+  width: 150px;
+}
+
+.botones-modal {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 600px) {
+  header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .campos { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>🇧🇷 Biblioteca de Cavaquinho</h1>
+
+  <div style="display:flex; gap:8px; flex-wrap:wrap;">
+    <button onclick="abrirEditorNuevo(null)">+ Crear acorde</button>
+    <button onclick="crearCarpeta()">+ Crear carpeta</button>
+    <button onclick="exportarBiblioteca()">Exportar JSON</button>
+    <button onclick="document.getElementById('archivoBiblioteca').click()">Importar JSON</button>
+
+    <input
+      id="archivoBiblioteca"
+      type="file"
+      accept=".json,application/json"
+      style="display:none"
+      onchange="importarBiblioteca(event)"
+    >
+  </div>
+</header>
+
+<div class="zona">
+  <div id="biblioteca" class="biblioteca"></div>
+</div>
+
+<div id="modalEditor" class="modal">
+  <div class="panel">
+    <h2 id="tituloEditor">Crear acorde</h2>
+
+    <div class="campos">
+      <div class="campo">
+        <label>Nombre del acorde</label>
+        <input id="nombreAcorde" type="text" placeholder="Ejemplo: C7" autocomplete="off">
+      </div>
+
+      <div class="campo">
+        <label>Número de abajo</label>
+        <input id="numeroAbajo" type="text" placeholder="Ejemplo: 1" autocomplete="off">
+      </div>
+
+      <div class="campo">
+        <label>Cuerda 1</label>
+        <select id="cuerda1">
+          <option value="0">Sin círculo</option>
+          <option value="1">Traste 1</option>
+          <option value="2">Traste 2</option>
+          <option value="3">Traste 3</option>
+          <option value="4">Traste 4</option>
+          <option value="5">Traste 5</option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label>Cuerda 2</label>
+        <select id="cuerda2">
+          <option value="0">Sin círculo</option>
+          <option value="1">Traste 1</option>
+          <option value="2">Traste 2</option>
+          <option value="3">Traste 3</option>
+          <option value="4">Traste 4</option>
+          <option value="5">Traste 5</option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label>Cuerda 3</label>
+        <select id="cuerda3">
+          <option value="0">Sin círculo</option>
+          <option value="1">Traste 1</option>
+          <option value="2">Traste 2</option>
+          <option value="3">Traste 3</option>
+          <option value="4">Traste 4</option>
+          <option value="5">Traste 5</option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label>Cuerda 4</label>
+        <select id="cuerda4">
+          <option value="0">Sin círculo</option>
+          <option value="1">Traste 1</option>
+          <option value="2">Traste 2</option>
+          <option value="3">Traste 3</option>
+          <option value="4">Traste 4</option>
+          <option value="5">Traste 5</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="vistaPrevia" class="vista-previa"></div>
+
+    <div class="botones-modal">
+      <button onclick="guardarAcorde()">Guardar</button>
+      <button onclick="cerrarEditor()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const CLAVE_BIBLIOTECA = "bibliotecaCavaquinho";
+const CLAVE_SELECCION = "tarjetaSeleccionada";
+
+let datosBiblioteca = {
+  acordesSueltos: [],
+  carpetas: []
+};
+
+let acordeEditando = null;
+let carpetaDestinoCreacion = null;
+let arrastre = null;
+let seEstaArrastrando = false;
+
+const biblioteca = document.getElementById("biblioteca");
+
+function generarId(prefijo) {
+  return prefijo + "-" + Date.now() + "-" + Math.random().toString(36).slice(2, 9);
+}
+
+function normalizarAcorde(acorde) {
+  return {
+    id: acorde.id || generarId("acorde"),
+    nombre: typeof acorde.nombre === "string" ? acorde.nombre : "",
+    numeroAbajo: typeof acorde.numeroAbajo === "string" ? acorde.numeroAbajo : "",
+    cuerdas: Array.isArray(acorde.cuerdas) && acorde.cuerdas.length === 4
+      ? acorde.cuerdas.map(Number)
+      : [0, 0, 0, 0]
+  };
+}
+
+function cargarBiblioteca() {
+  try {
+    const guardado = localStorage.getItem(CLAVE_BIBLIOTECA);
+
+    if (!guardado) {
+      pintarBiblioteca();
+      return;
+    }
+
+    const parsed = JSON.parse(guardado);
+
+    // Migra automáticamente tu formato antiguo: un array de acordes.
+    if (Array.isArray(parsed)) {
+      datosBiblioteca = {
+        acordesSueltos: parsed.map(normalizarAcorde),
+        carpetas: []
+      };
+      guardarBiblioteca();
+    } else {
+      datosBiblioteca = {
+        acordesSueltos: Array.isArray(parsed.acordesSueltos)
+          ? parsed.acordesSueltos.map(normalizarAcorde)
+          : [],
+        carpetas: Array.isArray(parsed.carpetas)
+          ? parsed.carpetas.map(carpeta => ({
+              id: carpeta.id || generarId("carpeta"),
+              nombre: carpeta.nombre || "Carpeta",
+              acordes: Array.isArray(carpeta.acordes)
+                ? carpeta.acordes.map(normalizarAcorde)
+                : []
+            }))
+          : []
+      };
+    }
+  } catch (error) {
+    console.error("No se pudo cargar la biblioteca:", error);
+    datosBiblioteca = { acordesSueltos: [], carpetas: [] };
+  }
+
+  pintarBiblioteca();
+}
+
+function guardarBiblioteca() {
+  localStorage.setItem(CLAVE_BIBLIOTECA, JSON.stringify(datosBiblioteca));
+}
+
+function crearDiagrama(datos) {
+  const diagrama = document.createElement("div");
+  diagrama.className = "diagrama";
+
+  for (let cuerda = 1; cuerda <= 4; cuerda++) {
+    const linea = document.createElement("div");
+    linea.className = "cuerda c" + cuerda;
+    diagrama.appendChild(linea);
+  }
+
+  for (let traste = 0; traste <= 5; traste++) {
+    const linea = document.createElement("div");
+    linea.className = "traste t" + traste;
+    diagrama.appendChild(linea);
+  }
+
+  datos.cuerdas.forEach((traste, indice) => {
+    if (Number(traste) === 0) return;
+
+    const punto = document.createElement("div");
+    punto.className = "punto";
+    punto.style.top = (15 + indice * 20) + "px";
+    punto.style.left = ((Number(traste) - 0.5) * 24) + "px";
+    diagrama.appendChild(punto);
+  });
+
+  return diagrama;
+}
+
+function crearTarjeta(datos, ubicacion, incluirAcciones = true) {
+  const tarjeta = document.createElement("div");
+  tarjeta.className = "acorde-card";
+  tarjeta.draggable = incluirAcciones;
+  tarjeta.dataset.acordeId = datos.id;
+
+  const nombre = document.createElement("div");
+  nombre.className = "nombre-acorde";
+  nombre.textContent = datos.nombre;
+
+  const numero = document.createElement("div");
+  numero.className = "traste-numero";
+  numero.textContent = datos.numeroAbajo || "";
+
+  tarjeta.appendChild(nombre);
+  tarjeta.appendChild(crearDiagrama(datos));
+  tarjeta.appendChild(numero);
+
+  if (incluirAcciones) {
+    const acciones = document.createElement("div");
+    acciones.className = "acciones-tarjeta";
+
+    const editar = document.createElement("button");
+    editar.textContent = "Editar";
+    editar.onclick = event => {
+      event.stopPropagation();
+      abrirEditorEdicion(datos.id);
+    };
+
+    const borrar = document.createElement("button");
+    borrar.textContent = "Borrar";
+    borrar.onclick = event => {
+      event.stopPropagation();
+      borrarAcorde(datos.id);
+    };
+
+    acciones.appendChild(editar);
+    acciones.appendChild(borrar);
+    tarjeta.appendChild(acciones);
+
+    tarjeta.onclick = () => {
+      if (!seEstaArrastrando) devolverAcordeAlEditor(datos);
+    };
+
+    tarjeta.addEventListener("dragstart", event => {
+      arrastre = {
+        tipo: "acorde",
+        acordeId: datos.id,
+        carpetaOrigenId: ubicacion.carpetaId
+      };
+
+      seEstaArrastrando = true;
+      tarjeta.classList.add("arrastrando");
+      event.dataTransfer.effectAllowed = "move";
+      event.dataTransfer.setData("text/plain", datos.id);
+    });
+
+    tarjeta.addEventListener("dragover", event => {
+      if (!arrastre || arrastre.tipo !== "acorde") return;
+      event.preventDefault();
+      event.stopPropagation();
+      tarjeta.style.borderColor = "#2f81f7";
+    });
+
+    tarjeta.addEventListener("dragleave", () => {
+      tarjeta.style.borderColor = "";
+    });
+
+    tarjeta.addEventListener("drop", event => {
+      if (!arrastre || arrastre.tipo !== "acorde") return;
+      event.preventDefault();
+      event.stopPropagation();
+      tarjeta.style.borderColor = "";
+      moverAcorde(arrastre.acordeId, ubicacion.carpetaId, datos.id);
+    });
+
+    tarjeta.addEventListener("dragend", () => {
+      tarjeta.classList.remove("arrastrando");
+      tarjeta.style.borderColor = "";
+      arrastre = null;
+      setTimeout(() => seEstaArrastrando = false, 150);
+    });
+  }
+
+  return tarjeta;
+}
+
+function obtenerLista(carpetaId) {
+  if (carpetaId === null) return datosBiblioteca.acordesSueltos;
+
+  const carpeta = datosBiblioteca.carpetas.find(c => c.id === carpetaId);
+  return carpeta ? carpeta.acordes : null;
+}
+
+function localizarAcorde(acordeId) {
+  let indice = datosBiblioteca.acordesSueltos.findIndex(a => a.id === acordeId);
+
+  if (indice !== -1) {
+    return {
+      acorde: datosBiblioteca.acordesSueltos[indice],
+      lista: datosBiblioteca.acordesSueltos,
+      indice,
+      carpetaId: null
+    };
+  }
+
+  for (const carpeta of datosBiblioteca.carpetas) {
+    indice = carpeta.acordes.findIndex(a => a.id === acordeId);
+    if (indice !== -1) {
+      return {
+        acorde: carpeta.acordes[indice],
+        lista: carpeta.acordes,
+        indice,
+        carpetaId: carpeta.id
+      };
+    }
+  }
+
+  return null;
+}
+
+function crearZonaAcordes(carpetaId, acordes) {
+  const lista = document.createElement("div");
+  lista.className = "lista-acordes";
+  lista.dataset.carpetaId = carpetaId === null ? "" : carpetaId;
+
+  if (acordes.length === 0) {
+    const mensaje = document.createElement("div");
+    mensaje.className = "mensaje-vacio";
+    mensaje.textContent = carpetaId === null
+      ? "No hay acordes sueltos."
+      : "Esta carpeta está vacía.";
+    lista.appendChild(mensaje);
+  } else {
+    acordes.forEach(acorde => {
+      lista.appendChild(
+        crearTarjeta(acorde, { carpetaId }, true)
+      );
+    });
+  }
+
+  lista.addEventListener("dragover", event => {
+    if (!arrastre || arrastre.tipo !== "acorde") return;
+    event.preventDefault();
+    event.stopPropagation();
+    lista.classList.add("destino");
+  });
+
+  lista.addEventListener("dragleave", event => {
+    if (!lista.contains(event.relatedTarget)) {
+      lista.classList.remove("destino");
+    }
+  });
+
+  lista.addEventListener("drop", event => {
+    if (!arrastre || arrastre.tipo !== "acorde") return;
+    event.preventDefault();
+    event.stopPropagation();
+    lista.classList.remove("destino");
+    moverAcorde(arrastre.acordeId, carpetaId, null);
+  });
+
+  return lista;
+}
+
+function crearBloqueSueltos() {
+  const bloque = document.createElement("section");
+  bloque.className = "bloque";
+
+  const cabecera = document.createElement("div");
+  cabecera.className = "cabecera-bloque";
+  cabecera.style.cursor = "default";
+
+  const titulo = document.createElement("div");
+  titulo.className = "titulo-carpeta";
+  titulo.textContent = "Acordes sin carpeta";
+
+  const acciones = document.createElement("div");
+  acciones.className = "acciones-carpeta";
+
+  const crear = document.createElement("button");
+  crear.textContent = "+ Crear acorde";
+  crear.onclick = () => abrirEditorNuevo(null);
+
+  acciones.appendChild(crear);
+  cabecera.appendChild(titulo);
+  cabecera.appendChild(acciones);
+
+  bloque.appendChild(cabecera);
+  bloque.appendChild(crearZonaAcordes(null, datosBiblioteca.acordesSueltos));
+
+  return bloque;
+}
+
+function crearBloqueCarpeta(carpeta) {
+  const bloque = document.createElement("section");
+  bloque.className = "bloque";
+  bloque.draggable = true;
+  bloque.dataset.carpetaId = carpeta.id;
+
+  const cabecera = document.createElement("div");
+  cabecera.className = "cabecera-bloque";
+
+  const titulo = document.createElement("div");
+  titulo.className = "titulo-carpeta";
+  titulo.textContent = "📁 " + carpeta.nombre;
+
+  const acciones = document.createElement("div");
+  acciones.className = "acciones-carpeta";
+
+  const crear = document.createElement("button");
+  crear.textContent = "+ Crear acorde";
+  crear.onclick = event => {
+    event.stopPropagation();
+    abrirEditorNuevo(carpeta.id);
+  };
+
+  const renombrar = document.createElement("button");
+  renombrar.textContent = "Renombrar";
+  renombrar.onclick = event => {
+    event.stopPropagation();
+    renombrarCarpeta(carpeta.id);
+  };
+
+  const borrar = document.createElement("button");
+  borrar.textContent = "Borrar carpeta";
+  borrar.onclick = event => {
+    event.stopPropagation();
+    borrarCarpeta(carpeta.id);
+  };
+
+  acciones.appendChild(crear);
+  acciones.appendChild(renombrar);
+  acciones.appendChild(borrar);
+
+  cabecera.appendChild(titulo);
+  cabecera.appendChild(acciones);
+
+  bloque.appendChild(cabecera);
+  bloque.appendChild(crearZonaAcordes(carpeta.id, carpeta.acordes));
+
+  bloque.addEventListener("dragstart", event => {
+    if (event.target.closest(".acorde-card")) return;
+
+    arrastre = {
+      tipo: "carpeta",
+      carpetaId: carpeta.id
+    };
+
+    bloque.classList.add("arrastrando");
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", carpeta.id);
+  });
+
+  bloque.addEventListener("dragover", event => {
+    if (!arrastre || arrastre.tipo !== "carpeta") return;
+    event.preventDefault();
+    bloque.classList.add("destino-carpeta");
+  });
+
+  bloque.addEventListener("dragleave", () => {
+    bloque.classList.remove("destino-carpeta");
+  });
+
+  bloque.addEventListener("drop", event => {
+    if (!arrastre || arrastre.tipo !== "carpeta") return;
+    event.preventDefault();
+    event.stopPropagation();
+    bloque.classList.remove("destino-carpeta");
+    moverCarpeta(arrastre.carpetaId, carpeta.id);
+  });
+
+  bloque.addEventListener("dragend", () => {
+    bloque.classList.remove("arrastrando");
+    bloque.classList.remove("destino-carpeta");
+    arrastre = null;
+  });
+
+  return bloque;
+}
+
+function pintarBiblioteca() {
+  biblioteca.innerHTML = "";
+  biblioteca.appendChild(crearBloqueSueltos());
+
+  datosBiblioteca.carpetas.forEach(carpeta => {
+    biblioteca.appendChild(crearBloqueCarpeta(carpeta));
+  });
+}
+
+function crearCarpeta() {
+  const nombre = prompt("Nombre de la carpeta:", "Nueva carpeta");
+  if (nombre === null) return;
+
+  const limpio = nombre.trim();
+  if (!limpio) return;
+
+  datosBiblioteca.carpetas.push({
+    id: generarId("carpeta"),
+    nombre: limpio,
+    acordes: []
+  });
+
+  guardarBiblioteca();
+  pintarBiblioteca();
+}
+
+function renombrarCarpeta(carpetaId) {
+  const carpeta = datosBiblioteca.carpetas.find(c => c.id === carpetaId);
+  if (!carpeta) return;
+
+  const nombre = prompt("Nuevo nombre:", carpeta.nombre);
+  if (nombre === null) return;
+
+  const limpio = nombre.trim();
+  if (!limpio) return;
+
+  carpeta.nombre = limpio;
+  guardarBiblioteca();
+  pintarBiblioteca();
+}
+
+function borrarCarpeta(carpetaId) {
+  const indice = datosBiblioteca.carpetas.findIndex(c => c.id === carpetaId);
+  if (indice === -1) return;
+
+  const carpeta = datosBiblioteca.carpetas[indice];
+
+  const confirmar = confirm(
+    "¿Borrar la carpeta «" + carpeta.nombre + "»?\n\n" +
+    "Los acordes de dentro NO se borrarán: volverán a «Acordes sin carpeta»."
+  );
+
+  if (!confirmar) return;
+
+  datosBiblioteca.acordesSueltos.push(...carpeta.acordes);
+  datosBiblioteca.carpetas.splice(indice, 1);
+
+  guardarBiblioteca();
+  pintarBiblioteca();
+}
+
+function moverCarpeta(origenId, destinoId) {
+  if (origenId === destinoId) return;
+
+  const origen = datosBiblioteca.carpetas.findIndex(c => c.id === origenId);
+  const destino = datosBiblioteca.carpetas.findIndex(c => c.id === destinoId);
+
+  if (origen === -1 || destino === -1) return;
+
+  const [movida] = datosBiblioteca.carpetas.splice(origen, 1);
+  const destinoAjustado = origen < destino ? destino - 1 : destino;
+  datosBiblioteca.carpetas.splice(destinoAjustado, 0, movida);
+
+  guardarBiblioteca();
+  pintarBiblioteca();
+}
+
+function moverAcorde(acordeId, carpetaDestinoId, acordeDestinoId = null) {
+  const origen = localizarAcorde(acordeId);
+  const listaDestino = obtenerLista(carpetaDestinoId);
+
+  if (!origen || !listaDestino) return;
+
+  const [acorde] = origen.lista.splice(origen.indice, 1);
+
+  let indiceDestino = listaDestino.length;
+
+  if (acordeDestinoId) {
+    const encontrado = listaDestino.findIndex(a => a.id === acordeDestinoId);
+    if (encontrado !== -1) indiceDestino = encontrado;
+  }
+
+  listaDestino.splice(indiceDestino, 0, acorde);
+
+  guardarBiblioteca();
+  pintarBiblioteca();
+}
+
+function abrirEditorNuevo(carpetaId) {
+  acordeEditando = null;
+  carpetaDestinoCreacion = carpetaId;
+
+  document.getElementById("tituloEditor").textContent =
+    carpetaId
+      ? "Crear acorde dentro de la carpeta"
+      : "Crear acorde";
+
+  document.getElementById("nombreAcorde").value = "";
+  document.getElementById("numeroAbajo").value = "";
+  document.getElementById("cuerda1").value = "0";
+  document.getElementById("cuerda2").value = "0";
+  document.getElementById("cuerda3").value = "0";
+  document.getElementById("cuerda4").value = "0";
+
+  actualizarVistaPrevia();
+  document.getElementById("modalEditor").style.display = "flex";
+  document.getElementById("nombreAcorde").focus();
+}
+
+function abrirEditorEdicion(acordeId) {
+  const localizado = localizarAcorde(acordeId);
+  if (!localizado) return;
+
+  acordeEditando = acordeId;
+  carpetaDestinoCreacion = localizado.carpetaId;
+
+  const acorde = localizado.acorde;
+
+  document.getElementById("tituloEditor").textContent = "Editar acorde";
+  document.getElementById("nombreAcorde").value = acorde.nombre;
+  document.getElementById("numeroAbajo").value = acorde.numeroAbajo || "";
+  document.getElementById("cuerda1").value = String(acorde.cuerdas[0] || 0);
+  document.getElementById("cuerda2").value = String(acorde.cuerdas[1] || 0);
+  document.getElementById("cuerda3").value = String(acorde.cuerdas[2] || 0);
+  document.getElementById("cuerda4").value = String(acorde.cuerdas[3] || 0);
+
+  actualizarVistaPrevia();
+  document.getElementById("modalEditor").style.display = "flex";
+}
+
+function cerrarEditor() {
+  document.getElementById("modalEditor").style.display = "none";
+  acordeEditando = null;
+  carpetaDestinoCreacion = null;
+}
+
+function obtenerDatosEditor() {
+  return {
+    nombre: document.getElementById("nombreAcorde").value.trim(),
+    numeroAbajo: document.getElementById("numeroAbajo").value.trim(),
+    cuerdas: [
+      Number(document.getElementById("cuerda1").value),
+      Number(document.getElementById("cuerda2").value),
+      Number(document.getElementById("cuerda3").value),
+      Number(document.getElementById("cuerda4").value)
+    ]
+  };
+}
+
+function guardarAcorde() {
+  const datos = obtenerDatosEditor();
+
+  if (!datos.nombre) {
+    alert("Escribe el nombre del acorde.");
+    return;
+  }
+
+  if (acordeEditando === null) {
+    const lista = obtenerLista(carpetaDestinoCreacion);
+    if (!lista) return;
+
+    lista.push({
+      id: generarId("acorde"),
+      ...datos
+    });
+  } else {
+    const localizado = localizarAcorde(acordeEditando);
+    if (!localizado) return;
+
+    localizado.lista[localizado.indice] = {
+      id: acordeEditando,
+      ...datos
+    };
+  }
+
+  guardarBiblioteca();
+  cerrarEditor();
+  pintarBiblioteca();
+}
+
+function borrarAcorde(acordeId) {
+  const localizado = localizarAcorde(acordeId);
+  if (!localizado) return;
+
+  if (!confirm("¿Borrar el acorde " + localizado.acorde.nombre + "?")) return;
+
+  localizado.lista.splice(localizado.indice, 1);
+  guardarBiblioteca();
+  pintarBiblioteca();
+}
+
+function actualizarVistaPrevia() {
+  const datos = obtenerDatosEditor();
+  const previa = document.getElementById("vistaPrevia");
+  previa.innerHTML = "";
+
+  previa.appendChild(
+    crearTarjeta(
+      {
+        id: "previa",
+        nombre: datos.nombre || "Acorde",
+        numeroAbajo: datos.numeroAbajo,
+        cuerdas: datos.cuerdas
+      },
+      { carpetaId: null },
+      false
+    )
+  );
+}
+
+function devolverAcordeAlEditor(datos) {
+  const puntos = datos.cuerdas
+    .map((traste, indice) => Number(traste) === 0 ? null : (indice + 1) + "-" + Number(traste))
+    .filter(Boolean)
+    .join(",");
+
+  const tarjeta = document.createElement("div");
+  tarjeta.className = "acorde-card";
+
+  const nombre = document.createElement("div");
+  nombre.className = "nombre-acorde";
+  nombre.textContent = datos.nombre;
+
+  const diagrama = document.createElement("div");
+  diagrama.className = "diagrama";
+  diagrama.dataset.puntos = puntos;
+
+  const numero = document.createElement("div");
+  numero.className = "traste-numero";
+  numero.textContent = datos.numeroAbajo || "";
+
+  tarjeta.appendChild(nombre);
+  tarjeta.appendChild(diagrama);
+  tarjeta.appendChild(numero);
+
+  const html = tarjeta.outerHTML;
+
+  localStorage.setItem(CLAVE_SELECCION, html);
+
+  if (window.opener && !window.opener.closed) {
+    window.opener.postMessage(
+      { tipo: "acordeCavaquinho", html },
+      "*"
+    );
+  }
+
+  setTimeout(() => window.close(), 300);
+}
+
+[
+  "nombreAcorde",
+  "numeroAbajo",
+  "cuerda1",
+  "cuerda2",
+  "cuerda3",
+  "cuerda4"
+].forEach(id => {
+  document.getElementById(id).addEventListener("input", actualizarVistaPrevia);
+  document.getElementById(id).addEventListener("change", actualizarVistaPrevia);
+});
+
+document.getElementById("modalEditor").addEventListener("click", event => {
+  if (event.target.id === "modalEditor") cerrarEditor();
+});
+
+function exportarBiblioteca() {
+  const total =
+    datosBiblioteca.acordesSueltos.length +
+    datosBiblioteca.carpetas.reduce((suma, carpeta) => suma + carpeta.acordes.length, 0);
+
+  if (total === 0 && datosBiblioteca.carpetas.length === 0) {
+    alert("La biblioteca está vacía.");
+    return;
+  }
+
+  let nombreArchivo = prompt("Nombre del archivo JSON:", "biblioteca_cavaquinho");
+  if (nombreArchivo === null) return;
+
+  nombreArchivo = (nombreArchivo.trim() || "biblioteca_cavaquinho")
+    .replace(/\.json$/i, "")
+    .replace(/[<>:"/\\|?*\u0000-\u001F]/g, "_")
+    .replace(/\s+/g, "_");
+
+  const contenido = JSON.stringify(datosBiblioteca, null, 2);
+  const archivo = new Blob([contenido], { type: "application/json;charset=utf-8" });
+  const enlace = document.createElement("a");
+
+  enlace.href = URL.createObjectURL(archivo);
+  enlace.download = nombreArchivo + ".json";
+
+  document.body.appendChild(enlace);
+  enlace.click();
+  enlace.remove();
+
+  setTimeout(() => URL.revokeObjectURL(enlace.href), 1000);
+}
+
+function importarBiblioteca(event) {
+  const input = event.target;
+  const archivo = input.files[0];
+
+  if (!archivo) return;
+
+  const lector = new FileReader();
+
+  lector.onload = function(e) {
+    try {
+      const importados = JSON.parse(e.target.result);
+
+      let nuevaBiblioteca;
+
+      if (Array.isArray(importados)) {
+        nuevaBiblioteca = {
+          acordesSueltos: importados.map(normalizarAcorde),
+          carpetas: []
+        };
+      } else if (importados && typeof importados === "object") {
+        nuevaBiblioteca = {
+          acordesSueltos: Array.isArray(importados.acordesSueltos)
+            ? importados.acordesSueltos.map(normalizarAcorde)
+            : [],
+          carpetas: Array.isArray(importados.carpetas)
+            ? importados.carpetas.map(carpeta => ({
+                id: carpeta.id || generarId("carpeta"),
+                nombre: carpeta.nombre || "Carpeta",
+                acordes: Array.isArray(carpeta.acordes)
+                  ? carpeta.acordes.map(normalizarAcorde)
+                  : []
+              }))
+            : []
+        };
+      } else {
+        throw new Error("El JSON no contiene una biblioteca válida.");
+      }
+
+      const opcion = prompt(
+        "¿Qué quieres hacer?\n\n" +
+        "1 = SUSTITUIR la biblioteca actual.\n" +
+        "2 = AÑADIR a la biblioteca actual.",
+        "1"
+      );
+
+      if (opcion === null) return;
+
+      if (opcion.trim() === "1") {
+        if (!confirm("Se sustituirá la biblioteca actual completa.\n\n¿Continuar?")) return;
+        datosBiblioteca = nuevaBiblioteca;
+      } else if (opcion.trim() === "2") {
+        datosBiblioteca.acordesSueltos.push(...nuevaBiblioteca.acordesSueltos);
+        datosBiblioteca.carpetas.push(...nuevaBiblioteca.carpetas);
+      } else {
+        alert("Debes escribir 1 o 2.");
+        return;
+      }
+
+      guardarBiblioteca();
+      pintarBiblioteca();
+      alert("Biblioteca importada correctamente.");
+    } catch (error) {
+      console.error(error);
+      alert("No se pudo importar la biblioteca.\n\n" + error.message);
+    } finally {
+      input.value = "";
+    }
+  };
+
+  lector.onerror = function() {
+    alert("No se pudo leer el archivo seleccionado.");
+    input.value = "";
+  };
+
+  lector.readAsText(archivo);
+}
+
+cargarBiblioteca();
+</script>
+
+</body>
+</html>
